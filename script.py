@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup as BS
-import requests, sys
+from slugify import slugify
+import requests, sys, os
 
 #lidice - 4575
 #otto - 5523
@@ -27,8 +28,6 @@ def choose_deputy(DEP):
     iterate_deputy_years(min_y, max_y)
 
 def iterate_deputy_years(min_y, max_y):
-    print(min_y, max_y)
-
     for year in range(int(min_y), int(max_y)+1):
         year_url = BASE_URL+DEP+'/'+str(year)
         year_page = requests.get(year_url)
@@ -54,14 +53,23 @@ def get_page(page, year_url):
         speach_link = BS(speach_page_raw, PARSER).select('.portlet-borderless-container a')[-1]
         speach_page = requests.get(speach_link['href'])
         speach = BS(speach_page.text, PARSER)
+        name = speach.select('.well dd:nth-of-type(1) span:nth-of-type(1)')[0].text
         date = speach.select('.well dd:nth-of-type(2)')[0].text
         integral_text = speach.select('.texto-integral')[0].text
+
+        save_page(integral_text, date, name)
         sys.exit()
 
 
-def save_page():
-    pass
+def save_page(integral_text, date, name):
+    if not os.path.exists(slugify(name)):
+        os.makedirs(slugify(name))
 
+    f = open(slugify(name)+'/'+slugify(date)+'.txt', "w")
+    f.write(integral_text.replace('             ', ''))
+    f.close()
+
+    
 
 if __name__ == '__main__':
     global DEP 
