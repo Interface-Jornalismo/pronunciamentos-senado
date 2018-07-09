@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup as BS
 from slugify import slugify
-import requests, sys, os, re
+import requests, sys, os, re, argparse
 
 #To-do: adicionar teste para checar se senador não fez nenhum pronunciamento
 
@@ -11,6 +11,7 @@ PARSER = 'html5lib'
 BASE_URL = 'https://www25.senado.leg.br/web/atividade/pronunciamentos/-/p/parlamentar/'
 
 def choose_deputy(DEP, ano, page):
+    print(DEP, ano, page)
     '''
     Seleciona o deputado de acordo com seu código e acessa sua página de pronunciametos.
     '''    
@@ -89,7 +90,14 @@ def save_page(integral_text, date, name, tipo):
 
 if __name__ == '__main__':
     global DEP 
-    DEP = input('Qual o código do deputado?\n')
-    ano = 2014
-    page = 1
+
+    parser = argparse.ArgumentParser(description='Customiza raspagem.')
+    parser.add_argument('--page', type=int,  help='Defina uma página por onde começar a raspagem')
+    parser.add_argument('--year', type=int,  help='Defina um ano por onde começar a raspagem')
+    parser.add_argument('--dep', type=int,  help='Insira o código do deputado.')
+
+    args = parser.parse_args()
+    ano = args.year
+    page = args.page
+    DEP = args.dep
     choose_deputy(DEP, ano, page)
